@@ -1,93 +1,114 @@
 class Game {
-  constructor(container) {
-    this.container = container;
-    this.wordElement = container.querySelector('.word');
-    this.winsElement = container.querySelector('.status__wins');
-    this.lossElement = container.querySelector('.status__loss');
+    constructor(container) {
+        this.container = container;
+        this.wordElement = container.querySelector('.word');
+        this.winsElement = container.querySelector('.status__wins');
+        this.lossElement = container.querySelector('.status__loss');
 
-    this.reset();
+        this.timerElement = document.getElementById('timer');
+        this.timerId = null;
+        this.timerValue = 0;
 
-    this.registerEvents();
-  }
+        this.reset();
 
-  reset() {
-    this.setNewWord();
-    this.winsElement.textContent = 0;
-    this.lossElement.textContent = 0;
-  }
-
-  registerEvents() {
-    /*
-      TODO:
-      Написать обработчик события, который откликается
-      на каждый введённый символ.
-      В случае правильного ввода слова вызываем this.success()
-      При неправильном вводе символа - this.fail();
-      DOM-элемент текущего символа находится в свойстве this.currentSymbol.
-     */
-  }
-
-  success() {
-    if(this.currentSymbol.classList.contains("symbol_current")) this.currentSymbol.classList.remove("symbol_current");
-    this.currentSymbol.classList.add('symbol_correct');
-    this.currentSymbol = this.currentSymbol.nextElementSibling;
-
-    if (this.currentSymbol !== null) {
-      this.currentSymbol.classList.add('symbol_current');
-      return;
+        this.registerEvents();
     }
 
-    if (++this.winsElement.textContent === 10) {
-      alert('Победа!');
-      this.reset();
+    reset() {
+        this.setNewWord();
+        this.winsElement.textContent = 0;
+        this.lossElement.textContent = 0;
     }
-    this.setNewWord();
-  }
 
-  fail() {
-    if (++this.lossElement.textContent === 5) {
-      alert('Вы проиграли!');
-      this.reset();
+    timer() {
+        this.timerValue--;
+        this.timerElement.textContent = this.timerValue.toString();
+
+        if (this.timerValue === 0) {
+            this.fail();
+        }
     }
-    this.setNewWord();
-  }
 
-  setNewWord() {
-    const word = this.getWord();
+    onKey(event) {
+        let rightSymbol = this.currentSymbol.textContent.toLowerCase();
+        let gotSymbol = event.key.toLowerCase();
+        console.log(gotSymbol);
+        if (rightSymbol === gotSymbol) {
+            this.success();
+        } else {
+            this.fail();
+        }
+    }
 
-    this.renderWord(word);
-  }
+    registerEvents() {
+        document.addEventListener('keyup', this.onKey.bind(this));
+    }
 
-  getWord() {
-    const words = [
-        'bob',
-        'awesome',
-        'netology',
-        'hello',
-        'kitty',
-        'rock',
-        'youtube',
-        'popcorn',
-        'cinema',
-        'love',
-        'javascript'
-      ],
-      index = Math.floor(Math.random() * words.length);
+    success() {
+        if (this.currentSymbol.classList.contains("symbol_current")) this.currentSymbol.classList.remove("symbol_current");
+        this.currentSymbol.classList.add('symbol_correct');
+        this.currentSymbol = this.currentSymbol.nextElementSibling;
 
-    return words[index];
-  }
+        if (this.currentSymbol !== null) {
+            this.currentSymbol.classList.add('symbol_current');
+            return;
+        }
 
-  renderWord(word) {
-    const html = [...word]
-      .map(
-        (s, i) =>
-          `<span class="symbol ${i === 0 ? 'symbol_current': ''}">${s}</span>`
-      )
-      .join('');
-    this.wordElement.innerHTML = html;
+        if (++this.winsElement.textContent === 10) {
+            alert('Победа!');
+            this.reset();
+        }
+        this.setNewWord();
+    }
 
-    this.currentSymbol = this.wordElement.querySelector('.symbol_current');
-  }
+    fail() {
+        if (++this.lossElement.textContent === 5) {
+            alert('Вы проиграли!');
+            this.reset();
+        }
+        this.setNewWord();
+    }
+
+    setNewWord() {
+        const word = this.getWord();
+        this.renderWord(word);
+        this.timerValue = word.length;
+
+        if (this.timerId) {
+            clearInterval(this.timerId);
+        }
+        this.timerId = setInterval(this.timer.bind(this), 1000);
+    }
+
+    getWord() {
+        const words = [
+                'bob',
+                'awesome',
+                'netology',
+                'hello',
+                'kitty',
+                'rock',
+                'youtube',
+                'popcorn',
+                'cinema',
+                'love',
+                'javascript'
+            ],
+            index = Math.floor(Math.random() * words.length);
+
+        return words[index];
+    }
+
+    renderWord(word) {
+        this.wordElement.innerHTML = [...word]
+            .map(
+                (s, i) =>
+                    `<span class="symbol ${i === 0 ? 'symbol_current' : ''}">${s}</span>`
+            )
+            .join('');
+        this.currentSymbol = this.wordElement.querySelector('.symbol_current');
+        this.timerElement.textContent = word.length.toString();
+    }
 }
 
 new Game(document.getElementById('game'))
