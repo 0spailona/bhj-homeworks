@@ -43,10 +43,8 @@ function drawWelcomeCard() {
 }
 
 function saveData(e) {
-    const answer = JSON.parse(e.target.responseText);
-    for (let control of document.querySelectorAll('.control')) {
-        control.value = '';
-    }
+    const answer = e.target.response;
+    document.querySelector('#signin__form').reset();
     if (!answer['success']) {
         alert('Неверный логин/пароль');
     } else {
@@ -61,6 +59,7 @@ function sendData(e) {
     const data = new FormData(e.target);
     const xhrPost = new XMLHttpRequest();
     xhrPost.open('POST', 'https://students.netoservices.ru/nestjs-backend/auth', true);
+    xhrPost.responseType = 'json';
     xhrPost.addEventListener('load', saveData);
     xhrPost.send(data);
 }
